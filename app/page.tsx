@@ -23,11 +23,16 @@ function makeInitialState(config: EnvConfig): EnvState {
 }
 
 export default function Home() {
+  const [isHydrated, setIsHydrated] = useState(false);
   const [config, setConfig] = useState<EnvConfig>(DEFAULT_CONFIG);
   const [envState, setEnvState] = useState<EnvState>(() => makeInitialState(DEFAULT_CONFIG));
   const [activeTab, setActiveTab] = useState<"log"|"config">("log");
   const actionCounter = useRef({ current: 0 });
   const intervalRef = useRef<ReturnType<typeof setInterval>|null>(null);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const reset = useCallback((cfg: EnvConfig = config) => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -71,6 +76,26 @@ export default function Home() {
   }, [config.speedMs]);
 
   const epHistory = envState.episodeHistory.map(e => ({ id: e.id, totalReward: e.totalReward, success: e.success }));
+
+  if (!isHydrated) {
+    return (
+      <main className="min-h-screen bg-slate-950 text-slate-100 p-4">
+        <div className="max-w-6xl mx-auto mb-5">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                <span className="text-blue-400">RL</span> Environment Visualizer
+              </h1>
+              <p className="text-slate-400 text-sm mt-0.5">
+                Interactive Reinforcement Learning environment with Overseer agent · Next.js + TypeScript
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto text-center text-slate-400">Loading...</div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-4">
